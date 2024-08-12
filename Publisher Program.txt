@@ -1,0 +1,35 @@
+import time
+import Adafruit_DHT
+import paho.mqtt.client as mqtt
+
+# Configuration
+DHT_SENSOR = Adafruit_DHT.DHT11
+DHT_PIN = 4  # GPIO pin where the DHT11 is connected
+MQTT_BROKER = "mqtt.eclipseprojects.io"
+MQTT_TOPIC = "hotel/temperature"
+
+def read_temperature():
+    humidity, temperature = Adafruit_DHT.read(DHT_SENSOR, DHT_PIN)
+    if temperature is not None:
+        return temperature
+    else:
+        return None
+
+def publish_temperature(client):
+    temperature = read_temperature()
+    if temperature:
+        print(f"Publishing temperature: {temperature}°C")
+        client.publish(MQTT_TOPIC, temperature)
+    else:
+        print("Failed to retrieve data from sensor")
+
+def main():
+    client = mqtt.Client()
+    client.connect(MQTT_BROKER)
+    
+    while True:
+        publish_temperature(client)
+        time.sleep(60)  # Wait for 60 seconds
+
+if __name__ == "__main__":
+    main()

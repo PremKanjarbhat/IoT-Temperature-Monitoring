@@ -1,0 +1,23 @@
+from flask import Flask, jsonify
+import json
+
+app = Flask(__name__)
+
+def get_last_temperature():
+    try:
+        with open('temperature_log.json', 'r') as file:
+            data = json.load(file)
+            return data[-1] if data else None
+    except FileNotFoundError:
+        return None
+
+@app.route('/temperature', methods=['GET'])
+def temperature():
+    last_temp = get_last_temperature()
+    if last_temp:
+        return jsonify(last_temp), 200
+    else:
+        return jsonify({"error": "No data available"}), 404
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
